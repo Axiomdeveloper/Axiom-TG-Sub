@@ -1,0 +1,63 @@
+name: Axiom TG — auto-update subscription
+
+on:
+  schedule:
+    # every 5 hours at minute 7 (UTC)
+    - cron: "7 */5 * * *"
+  workflow_dispatch: # manual run from the Actions tab
+
+permissions:
+  contents: write # commit sub/ + stats.json + archive back to the repo
+
+concurrency:
+  group: axiom-update
+  cancel-in-progress: false
+
+jobs:
+  harvest:
+    name: Harvest Telegram → build Axiom TG sub
+    runs-on: ubuntu-latest
+    env:
+      # Repository Variables (Settings → Secrets and variables → Actions)
+      #   vars.APP_URL          → deployed dashboard URL (optional, unlocks user counters)
+      #   secrets.INGEST_SECRET → bearer token matching the app's INGEST_SECRET (optional)
+      APP_URL: ${{ vars.APP_URL }}
+      INGEST_SECRET: ${{ secrets.INGEST_SECRET }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: scripts/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Harvest configs from Telegram (last 24h) & rebuild subscription
+        run: python scripts/fetch_configs.py
+
+      - name: Render static dashboard for GitHub Pages (docs/index.html)
+        run: python scripts/render_page.py
+
+      - name: Publish dashboard URL
+        run: |
+          REPO="${{ github.repository }}"
+          OWNER="${{ github.repository_owner }}"
+          echo "GitHub Pages → https://${OWNER,,}.github.io/${REPO#*/}/ "
+          echo "(enable once: Settings → Pages → Deploy from a branch → ${GITHUB_REF_NAME} /docs)"
+
+      - name: Commit artifacts (sub/, stats, archive, docs, README)
+        run: |
+          git config user.name "axiom-tg-bot"
+          git config user.email "axiom-tg-bot@users.noreply.github.com"
+          git add sub/ history/ stats.json docs/ README.md
+          if git diff --cached --quiet; then
+            echo "no changes — sub is already fresh"
+          else
+            git commit -m "chore(sub): refresh Axiom TG sub · $(date -u +'%Y-%m-%d %H:%MZ')"
+            git push || (git pull --rebase origin HEAD && git push)
+          fi

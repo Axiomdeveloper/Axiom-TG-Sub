@@ -1,0 +1,488 @@
+#!/usr/bin/env python3
+"""
+Axiom TG — static dashboard renderer for GitHub Pages.
+
+Runs in CI right after scripts/fetch_configs.py. It reads stats.json and
+renders a fully self-contained RTL dashboard at docs/index.html, then
+publishes it via GitHub Pages (Settings -> Pages -> main /docs).
+
+The page works 100% offline-first: numbers are baked in at build time, and a
+small JS layer re-fetches stats.json (raw.githubusercontent CORS*) to update
+itself between runs. Relative times, the next-sync progress bar, copy button
+and QR are all done client-side.
+
+Usage:  GITHUB_REPOSITORY=owner/repo GITHUB_REF_NAME=main python scripts/render_page.py
+"""
+from __future__ import annotations
+
+import json
+import os
+import re
+import string
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
+BASE = Path(__file__).resolve().parent.parent
+DOCS = BASE / "docs"
+README = BASE / "README.md"
+RX_PAGES_BLOCK = re.compile(
+    re.escape("<!-- AXIOM:PAGES:START -->") + r".*?" + re.escape("<!-- AXIOM:PAGES:END -->"),
+    re.DOTALL,
+)
+
+FA_DIGITS = str.maketrans("0123456789", "۰۱۲۳۴۵۶۷۸۹")
+
+
+def fa(n: int | float) -> str:
+    return f"{n:,}".replace(",", "٬").translate(FA_DIGITS)
+
+
+def load_stats() -> dict:
+    return json.loads((BASE / "stats.json").read_text(encoding="utf-8"))
+
+
+def channel_rows(stats: dict) -> tuple[str, int]:
+    chans = stats.get("perChannel") or []
+    if not chans:
+        return "", 0
+    mx = max(1, max(c.get("count", 0) for c in chans))
+    ok_count = sum(1 for c in chans if c.get("ok"))
+    rows = []
+    for c in sorted(chans, key=lambda x: x.get("count", 0), reverse=True):
+        count = int(c.get("count", 0))
+        fresh = int(c.get("fresh", 0))
+        pct = round(count / mx * 100)
+        dot = "#00e0a4" if c.get("ok") else "#fb7185"
+        status = "OK" if c.get("ok") else "FAIL"
+        fresh_chip = f'<span class="fresh">+{fa(fresh)} تازه</span>' if fresh else ""
+        rows.append(
+            f"""
+      <li class="row">
+        <span class="dot" style="color:{dot};background:{dot}" title="{status}"></span>
+        <a class="ch mono" dir="ltr" href="https://t.me/s/{c["id"]}" target="_blank" rel="noreferrer">@{c["id"]}</a>
+        <span class="barwrap" dir="ltr"><span class="bar" style="width:{pct}%"></span></span>
+        <span class="cnt mono">{fa(count)}{fresh_chip}</span>
+      </li>"""
+        )
+    return "".join(rows), ok_count
+
+
+_ICONS = {
+    "layers": '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>',
+    "zap": '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>',
+    "users": '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+    "sync": '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>',
+    "sat": '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10a7.31 7.31 0 0 0 10 10Z"/><path d="m9 15 3-3"/><path d="M17 13a6 6 0 0 0-6-6"/><path d="M21 13A10 10 0 0 0 11 3"/></svg>',
+    "clock": '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+    "tag": '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></svg>',
+    "branch": '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="6" y1="3" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>',
+}
+
+
+TEMPLATE = string.Template(r"""<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Axiom TG — ساب خودکار V2Ray</title>
+<meta name="description" content="هر ۵ ساعت کانفیگ‌های ۲۴ ساعت اخیر ۸ کانال تلگرامی، با نام Axiom TG، در یک ساب واحد. پالایش خودکار ۴۸ ساعته."/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='2' y='2' width='60' height='60' rx='16' fill='%2306080f'/%3E%3Cpath d='M20 44 L32 18 L44 44' fill='none' stroke='%2300e0a4' stroke-width='4.5' stroke-linecap='round'/%3E%3C/svg%3E"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<style>
+:root{--bg:#04050a;--panel:rgba(12,15,25,.66);--line:rgba(148,163,216,.12);--mint:#00e0a4;--viol:#7c5cff;--amber:#ffb020;--txt:#d4d6e3;--dim:#8b90a8;font-synthesis-weight:none}
+*{margin:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Vazirmatn',system-ui,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden}
+.mono{font-family:'JetBrains Mono',monospace}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1060px;margin:0 auto;padding:0 20px;position:relative;z-index:2}
+.fxglow{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0}
+.fxgrid{position:fixed;inset:0 0 auto 0;height:640px;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(148,163,216,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(148,163,216,.05) 1px,transparent 1px);background-size:56px 56px;-webkit-mask-image:radial-gradient(ellipse 90% 65% at 50% 0%,#000 30%,transparent 75%);mask-image:radial-gradient(ellipse 90% 65% at 50% 0%,#000 30%,transparent 75%)}
+.glass{background:linear-gradient(160deg,rgba(18,22,36,.66),rgba(9,11,19,.85));backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line)}
+.card{border-radius:24px;transition:transform .45s cubic-bezier(.16,1,.3,1),box-shadow .45s}
+.card:hover{transform:translateY(-4px);box-shadow:0 18px 60px -18px rgba(0,224,164,.22),0 10px 40px -12px rgba(124,92,255,.25)}
+.grad{background:linear-gradient(100deg,#eafff7 10%,var(--mint) 55%,#0aa3ff 120%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.grad2{background:linear-gradient(100deg,#f0ebff 5%,#a793ff 55%,#00e0a4 130%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;border:1px solid var(--line);background:rgba(11,14,22,.55);color:#aab0c9;font-size:12px;padding:4px 12px;white-space:nowrap}
+.dot{position:relative;width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.dot::after{content:"";position:absolute;inset:-4px;border-radius:50%;background:currentColor;opacity:.35;animation:ping 1.9s cubic-bezier(0,0,.2,1) infinite}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:11px 22px;font-weight:800;font-size:14px;cursor:pointer;border:none;transition:all .3s;font-family:inherit}
+.bm{background:linear-gradient(120deg,var(--mint),#00b4d8);color:#03120c;box-shadow:0 8px 32px -10px rgba(0,224,164,.55)}
+.bm:hover{transform:translateY(-2px);box-shadow:0 14px 44px -10px rgba(0,224,164,.75)}
+.bg1{border:1px solid var(--line);color:#cfd3e8;background:rgba(11,14,22,.5)}
+.bg1:hover{border-color:rgba(0,224,164,.5);color:#eafff7}
+@keyframes ping{75%,100%{transform:scale(2.4);opacity:0}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.bar{transform-origin:right center;animation:grow 1.1s cubic-bezier(.16,1,.3,1) both}
+header{position:sticky;top:0;z-index:50}
+.hdr{max-width:1060px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand b{font-size:17px} .brand small{display:block;font-size:11px;color:var(--dim);margin-top:2px}
+.hero{padding:96px 0 72px;text-align:center;position:relative}
+.ghost{position:absolute;inset:40px 0 auto 0;text-align:center;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:clamp(64px,15vw,150px);line-height:1;-webkit-text-stroke:1.5px rgba(148,163,216,.15);color:transparent;user-select:none;pointer-events:none;z-index:0}
+h1{position:relative;font-size:clamp(34px,6.5vw,62px);font-weight:900;line-height:1.18;color:#f4f5fb;z-index:1}
+.sub{margin:22px auto 0;max-width:640px;color:#9aa0b8;font-size:15px;line-height:2}
+.sub b{color:#e6e8f2}
+.suburl{position:relative;z-index:1;max-width:620px;margin:34px auto 0;display:flex;align-items:center;gap:10px;border-radius:999px;padding:8px 8px 8px 20px}
+.suburl code{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;font-size:13px;color:#a7f4d6}
+.chips{margin-top:26px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+section{padding:56px 0}
+h2{font-size:clamp(24px,4vw,34px);font-weight:900;color:#f4f5fb}
+.kick{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.35em;color:rgba(0,224,164,.8);margin-bottom:12px}
+.lead{color:#9aa0b8;font-size:13.5px;line-height:1.9;max-width:640px;margin-top:10px}
+.grid{display:grid;gap:16px;margin-top:34px}
+.grid.stats{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.stat{border-radius:24px;padding:26px}
+.stat .num{font-family:'JetBrains Mono',monospace;font-size:38px;font-weight:700;color:#f8f9ff;font-variant-numeric:tabular-nums}
+.stat .lbl{font-size:14px;font-weight:800;color:#e6e8f2;margin-top:10px}
+.stat .sub2{font-size:12px;color:var(--dim);margin-top:6px;line-height:1.7}
+.ic{width:44px;height:44px;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px;border:1px solid}
+.i-m{border-color:rgba(0,224,164,.25);background:rgba(0,224,164,.06);color:var(--mint)}
+.i-v{border-color:rgba(124,92,255,.25);background:rgba(124,92,255,.06);color:#b19bff}
+.i-a{border-color:rgba(255,176,32,.25);background:rgba(255,176,32,.06);color:var(--amber)}
+.progress{height:7px;border-radius:99px;background:rgba(255,255,255,.06);overflow:hidden;margin-top:14px;direction:ltr}
+.progress i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--mint),var(--viol));transition:width 1s}
+.chan{border-radius:28px;overflow:hidden;margin-top:34px}
+.chan header2{display:block}
+.chanhead{display:flex;justify-content:space-between;padding:16px 24px;font-size:11px;color:var(--dim);border-bottom:1px solid var(--line)}
+.row{display:flex;align-items:center;gap:14px;padding:13px 24px;transition:background .25s}
+.row:hover{background:rgba(255,255,255,.025)}
+.ch{font-size:13.5px;color:#e6e8f2;min-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color .25s}
+.ch:hover{color:var(--mint)}
+.barwrap{flex:1;height:8px;border-radius:99px;background:rgba(255,255,255,.05);overflow:hidden;position:relative}
+.bar{position:absolute;top:0;bottom:0;left:0;border-radius:99px;background:linear-gradient(90deg,rgba(0,224,164,.9),rgba(45,212,191,.85),rgba(124,92,255,.8));display:block}
+.cnt{font-size:15px;font-weight:700;color:#f8f9ff;width:120px;text-align:left;font-variant-numeric:tabular-nums}
+.fresh{display:block;font-size:10px;color:rgba(0,224,164,.85);font-weight:400}
+ul{list-style:none;padding:0}
+.connect{display:grid;gap:16px;grid-template-columns:1fr;margin-top:34px}
+@media(min-width:900px){.connect{grid-template-columns:3fr 2fr}}
+.panel{border-radius:28px;padding:30px}
+.urlbox{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:rgba(2,4,9,.55);border-radius:16px;padding:14px 16px;overflow:auto;margin-top:16px;direction:ltr}
+.urlbox code{font-family:'JetBrains Mono',monospace;font-size:13px;color:#a7f4d6;white-space:nowrap}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.qr{display:none;align-items:center;gap:18px;margin-top:22px}
+.qr.open{display:flex}
+.qr .frame{border-radius:22px;padding:12px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
+.qr img{display:block;width:150px;height:150px;border-radius:14px}
+.clist li{display:flex;justify-content:space-between;gap:12px;border:1px solid var(--line);background:rgba(2,4,9,.3);border-radius:14px;padding:10px 16px;font-size:13px}
+.clist li+li{margin-top:10px}
+.clist .pl{color:var(--dim);font-size:11.5px}
+.pipe{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:34px}
+.pstep{border-radius:22px;padding:22px;text-align:center;position:relative}
+.pstep .n{position:absolute;top:-10px;right:18px;border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:2px 10px;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--mint)}
+.pstep .t{font-size:14px;font-weight:900;color:#f1f2fa;margin-top:12px}
+.pstep .d{font-size:11.5px;color:var(--dim);line-height:1.8;margin-top:8px}
+.pstep .ic2{width:46px;height:46px;border-radius:16px;margin:0 auto;display:flex;align-items:center;justify-content:center;border:1px solid rgba(0,224,164,.2);background:rgba(0,224,164,.05);color:var(--mint)}
+footer{border-top:1px solid var(--line);background:rgba(2,4,9,.4);margin-top:40px}
+.ft{max-width:1060px;margin:0 auto;padding:26px 20px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;font-size:12px;color:var(--dim)}
+.note{border:1px solid rgba(0,224,164,.15);background:rgba(0,224,164,.05);border-radius:16px;padding:14px 16px;font-size:11.5px;line-height:1.9;color:rgba(212,255,238,.85);margin-top:20px}
+</style>
+</head>
+<body>
+<div class="fxglow" style="width:520px;height:520px;top:-12%;right:-8%;background:radial-gradient(circle,rgba(0,224,164,.16),transparent 65%);animation:floaty 9s ease-in-out infinite"></div>
+<div class="fxglow" style="width:440px;height:440px;top:40%;left:-10%;background:radial-gradient(circle,rgba(124,92,255,.14),transparent 65%);animation:floaty 12s ease-in-out infinite"></div>
+<div class="fxgrid"></div>
+
+<header class="glass">
+  <div class="hdr">
+    <a class="brand" href="#">
+      <svg width="36" height="36" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00e0a4"/><stop offset="1" stop-color="#7c5cff"/></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="16" fill="#06080f"/><rect x="2" y="2" width="60" height="60" rx="16" fill="none" stroke="url(#g)" stroke-width="3"/><path d="M20 44 L32 18 L44 44" fill="none" stroke="#eafff7" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M25.5 35.5 H38.5" stroke="url(#g)" stroke-width="4" stroke-linecap="round"/></svg>
+      <span><b dir="ltr">Axiom TG</b><small class="mono" dir="ltr" style="letter-spacing:.25em;color:rgba(0,224,164,.75)">AUTO·SUB·5H</small></span>
+    </a>
+    <div style="display:flex;gap:10px;align-items:center">
+      <span class="pill"><span class="dot" style="background:var(--mint);color:var(--mint)"></span><span id="hdrSync">سینک: $LAST_RUN_REL</span></span>
+      <a class="btn bg1" style="padding:9px 16px;font-size:13px" href="$REPO_URL" target="_blank" rel="noreferrer">گیت‌هاب</a>
+      <a class="btn bm" style="padding:9px 16px;font-size:13px" href="#connect">دریافت ساب</a>
+    </div>
+  </div>
+</header>
+
+<main>
+<section class="hero">
+  <div class="ghost" dir="ltr">AXIOM</div>
+  <div class="wrap">
+    <p class="pill mono" dir="ltr" style="margin-bottom:22px">telegram → v2ray · refreshed every 5h</p>
+    <h1>اشتراک زنده‌ی <span class="grad">V2Ray</span><br/>از قلبِ <span class="grad2">کانال‌های تلگرام</span></h1>
+    <p class="sub">هر <b>۵ ساعت</b> خودکار، کانفیگ‌های <b>۲۴ ساعت اخیر</b> ۸ کانال استخراج، یکدست به <span class="mono" dir="ltr" style="color:var(--mint)">Axiom TG</span> تغییر نام و در یک ساب واحد روی GitHub Pages منتشر می‌شوند؛ کانفیگ‌ها پس از <b>۴۸ ساعت</b> حذف می‌شوند.</p>
+    <div class="suburl glass">
+      <span class="dot" style="background:var(--mint);color:var(--mint)"></span>
+      <code id="subUrlText" class="mono" dir="ltr">$SUB_URL</code>
+      <button class="btn bm" style="padding:10px 18px;font-size:13px" onclick="copySub(this)">کپی ساب</button>
+    </div>
+    <div class="chips">
+      <span class="pill">۸ کانال فعال</span>
+      <span class="pill">به‌روزرسانی: هر ۵ ساعت</span>
+      <span class="pill">نگهداری: ۴۸ ساعت</span>
+      <span class="pill" style="color:var(--mint)"><span id="heroTotal">$TOTAL_FA</span> کانفیگ همین حالا داخل ساب</span>
+    </div>
+  </div>
+</section>
+
+<section class="wrap">
+  <p class="kick" dir="ltr">// LIVE STATS</p>
+  <h2>آمار زنده‌ی شبکه</h2>
+  <div class="grid stats">
+    <div class="glass card stat">
+      <span class="ic i-m">$ICON_LAYERS</span>
+      <div class="num" id="stTotal">$TOTAL_FA</div>
+      <div class="lbl">مجموع کانفیگ‌های ساب</div>
+      <div class="sub2">فعال در آرشیو‌ی ۴۸ ساعته</div>
+    </div>
+    <div class="glass card stat">
+      <span class="ic i-v">$ICON_ZAP</span>
+      <div class="num" id="stFresh">$FRESH_FA</div>
+      <div class="lbl">تازه‌های ۲۴ ساعت اخیر</div>
+      <div class="sub2">استخراج‌شده از آخرین پست‌های کانال‌ها</div>
+    </div>
+    <div class="glass card stat">
+      <span class="ic i-m">$ICON_USERS</span>
+      <div class="num" id="stUsers">$USERS_FA</div>
+      <div class="lbl">کاربران یکتای ساب</div>
+      <div class="sub2" id="stHitsSub">$USERS_NOTE</div>
+    </div>
+    <div class="glass card stat">
+      <span class="ic i-a">$ICON_SYNC</span>
+      <div class="lbl">چرخه‌ی سینک خودکار</div>
+      <div class="sub2" style="margin-bottom:10px">آخرین سینک: <b id="stLast" style="color:#e6e8f2">$LAST_RUN_REL</b></div>
+      <div class="progress"><i id="prog" style="width:0%"></i></div>
+      <div class="sub2" style="margin-top:8px">سینک بعدی: <b id="stNext" style="color:#e6e8f2">—</b> (حدودی)</div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap">
+  <p class="kick" dir="ltr">// TELEGRAM SOURCES</p>
+  <h2>هشت منبع تلگرامی — کانال به کانال</h2>
+  <p class="lead">تعداد کانفیگ‌های فعال هر کانال در آرشیو‌ی جاری و سهم ۲۴ ساعت اخیرش. کلیک روی نام، پیش‌نمایش عمومی کانال را باز می‌کند.</p>
+  <div class="glass card chan">
+    <div class="chanhead"><span>کانال تلگرام</span><span>تعداد کانفیگ</span></div>
+    <ul id="chanList">$CHANNEL_ROWS</ul>
+    <div class="chanhead mono" dir="ltr" style="justify-content:flex-start;gap:8px">TOTAL = $TOTAL_FA<span style="color:var(--mint)">●</span> retention: 48h</div>
+  </div>
+</section>
+
+<section class="wrap" id="connect">
+  <p class="kick" dir="ltr">// CONNECT</p>
+  <h2>لینک ساب را به کلاینت خود بدهید</h2>
+  <p class="lead">آدرس را در بخش Subscription کلاینت وارد کنید؛ خود کلاینت هر چند ساعت لیست را تازه می‌کند — همیشه کانفیگ تازه با نام Axiom TG خواهید داشت.</p>
+  <div class="connect">
+    <div class="glass card panel">
+      <b style="font-size:15px;color:#f1f2fa">آدرس اشتراک (سرو مستقیم از گیت‌هاب)</b>
+      <div class="urlbox"><code id="subUrlText2" dir="ltr">$SUB_URL</code></div>
+      <div class="actions">
+        <button class="btn bm" onclick="copySub(this)">کپی لینک</button>
+        <button class="btn bg1" onclick="toggleQr()">نمایش QR</button>
+        <a class="btn bg1" href="$SUB_URL" target="_blank" rel="noreferrer">بازکردن خام</a>
+        <a class="btn bg1" href="$SUB_URL" download="axiom_tg_sub.txt">دانلود</a>
+      </div>
+      <div class="qr" id="qrBox">
+        <div class="frame"><img id="qrImg" alt="QR of subscription" width="150" height="150"/></div>
+        <p style="font-size:12px;color:var(--dim);line-height:1.9;max-width:260px">در v2rayNG گزینه‌ی <b style="color:#e6e8f2">اسکن QR</b> را در صفحه‌ی Subscription بزنید تا ساب مستقیم اضافه شود.</p>
+      </div>
+      <div class="note" id="usersNote">$USERS_NOTE_LONG</div>
+    </div>
+    <div class="glass card panel">
+      <b style="font-size:15px;color:#f1f2fa">کلاینت‌های پیشنهادی</b>
+      <ul class="clist" style="margin-top:18px">
+        <li><span class="mono" dir="ltr">v2rayNG</span><span class="pl">Android</span></li>
+        <li><span class="mono" dir="ltr">Hiddify</span><span class="pl">همه‌ی پلتفرم‌ها</span></li>
+        <li><span class="mono" dir="ltr">Streisand / FoXray</span><span class="pl">iOS</span></li>
+        <li><span class="mono" dir="ltr">NekoBox</span><span class="pl">Android / PC</span></li>
+        <li><span class="mono" dir="ltr">V2Box / Shadowrocket</span><span class="pl">iOS</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="wrap">
+  <p class="kick" dir="ltr">// PIPELINE</p>
+  <h2>خط لوله‌ی کاملاً خودکار</h2>
+  <div class="pipe">
+    <div class="glass card pstep"><span class="n">01</span><div class="ic2">$ICON_SAT</div><div class="t">اسکن هر ۵ ساعت</div><div class="d">GitHub Action صفحه‌ی عمومی هر ۸ کانال را می‌خواند</div></div>
+    <div class="glass card pstep"><span class="n">02</span><div class="ic2">$ICON_CLOCK</div><div class="t">پنجره‌ی ۲۴ ساعته</div><div class="d">فقط پست‌های یک شبانه‌روز اخیر وارد چرخه می‌شوند</div></div>
+    <div class="glass card pstep"><span class="n">03</span><div class="ic2">$ICON_TAG</div><div class="t">ری‌نیم به Axiom TG</div><div class="d">نام همه‌ی کانفیگ‌ها یکدست می‌شود</div></div>
+    <div class="glass card pstep"><span class="n">04</span><div class="ic2">$ICON_SYNC</div><div class="t">آرشیو ۴۸ ساعته</div><div class="d">کانفیگ‌های دو روز پیش خودکار حذف می‌شوند</div></div>
+    <div class="glass card pstep"><span class="n">05</span><div class="ic2">$ICON_BRANCH</div><div class="t">انتشار روی Pages</div><div class="d">ساب + این داشبورد خودکار کامیت و منتشر می‌شود</div></div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="ft">
+    <div><b style="color:#e6e8f2"><span dir="ltr" class="mono">Axiom TG</span></b> — ساب خودکار V2Ray · هر ۵ ساعت تازه می‌شود · ۸ کانال · حذف خودکار پس از ۴۸ ساعت</div>
+    <div>ساخته‌شده با GitHub Actions + GitHub Pages</div>
+  </div>
+</footer>
+
+<script>
+var LAST_RUN = "$LAST_RUN_ISO";
+var NEXT_RUN = "$NEXT_RUN_ISO";
+var SUB_URL = "$SUB_URL";
+var STATS_URL = "$STATS_URL";
+var rtf = new Intl.RelativeTimeFormat("fa", { numeric: "auto" });
+function rel(iso) {
+  if (!iso) return "—";
+  var d = Math.round((new Date(iso).getTime() - Date.now()) / 1000);
+  var a = Math.abs(d);
+  if (a < 60) return rtf.format(d, "second");
+  if (a < 3600) return rtf.format(Math.round(d / 60), "minute");
+  if (a < 86400) return rtf.format(Math.round(d / 3600), "hour");
+  return rtf.format(Math.round(d / 86400), "day");
+}
+function faN(n) { return Number(n || 0).toLocaleString("fa-IR"); }
+function tick() {
+  var el = document.getElementById("stLast"); if (el) el.textContent = rel(LAST_RUN);
+  var h = document.getElementById("hdrSync"); if (h) h.textContent = "سینک: " + rel(LAST_RUN);
+  var nx = document.getElementById("stNext"); if (nx) nx.textContent = rel(NEXT_RUN);
+  if (LAST_RUN && NEXT_RUN) {
+    var l = new Date(LAST_RUN).getTime(), x = new Date(NEXT_RUN).getTime(), n = Date.now();
+    var p = Math.max(0, Math.min(100, (n - l) / Math.max(1, x - l) * 100));
+    var pr = document.getElementById("prog"); if (pr) pr.style.width = p + "%";
+  }
+}
+function copySub(btn) {
+  var done = function () { var t = btn.textContent; btn.textContent = "کپی شد ✓"; setTimeout(function () { btn.textContent = t; }, 1600); };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(SUB_URL).then(done, function () { legacyCopy(); done(); });
+  } else { legacyCopy(); done(); }
+}
+function legacyCopy() {
+  var ta = document.createElement("textarea"); ta.value = SUB_URL;
+  document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); } catch (e) {}
+  document.body.removeChild(ta);
+}
+var qrMade = false;
+function toggleQr() {
+  var box = document.getElementById("qrBox");
+  box.classList.toggle("open");
+  if (!qrMade && box.classList.contains("open")) {
+    qrMade = true;
+    try {
+      QRCode.toDataURL(SUB_URL, { width: 460, margin: 1, color: { dark: "#07110d", light: "#eafff7" } }, function (err, url) {
+        if (!err) document.getElementById("qrImg").src = url;
+      });
+    } catch (e) {}
+  }
+}
+/* live refresh: re-read stats.json from the repo (raw CORS is open) */
+function refresh(_) {
+  try {
+    fetch(STATS_URL + "?t=" + Date.now()).then(function (r) { return r.ok ? r.json() : null; }).then(function (s) {
+      if (!s) return;
+      setText("stTotal", faN(s.total)); setText("stFresh", faN(s.fresh24h));
+      setText("stUsers", faN(s.users)); setText("heroTotal", faN(s.total));
+      if (s.lastRun) { LAST_RUN = s.lastRun; var d = new Date(s.lastRun).getTime(); NEXT_RUN = new Date(d + 5 * 3600 * 1000).toISOString(); }
+      tick();
+    }).catch(function () {});
+  } catch (e) {}
+}
+function setText(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; }
+setInterval(tick, 1000); setInterval(refresh, 60000); tick();
+</script>
+</body>
+</html>
+""")
+
+
+def main() -> int:
+    stats = load_stats()
+    repo = os.environ.get("GITHUB_REPOSITORY", "OWNER/REPO")
+    branch = os.environ.get("GITHUB_REF_NAME", "main")
+    repo_url = f"https://github.com/{repo}"
+    sub_url = f"https://raw.githubusercontent.com/{repo}/{branch}/sub/axiom_sub.txt"
+    stats_url = f"https://raw.githubusercontent.com/{repo}/{branch}/stats.json"
+    pages_url = f"https://{repo.split('/')[0].lower()}.github.io/{repo.split('/')[-1]}/"
+
+    last_run = stats.get("lastRun") or ""
+    try:
+        next_run = (datetime.fromisoformat(last_run) + timedelta(hours=stats.get("updateEveryHours", 5))).isoformat()
+    except Exception:
+        next_run = ""
+
+    rows, _ok = channel_rows(stats)
+    total = int(stats.get("total", 0))
+    users = int(stats.get("users", 0))
+    hits = int(stats.get("hits", 0))
+
+    users_note = (
+        f"مجموع دریافت‌ها: {fa(hits)}"
+        if hits
+        else "با اتصال داشبورد Next.js روشن می‌شود"
+    )
+    users_note_long = (
+        "شمارش کاربران روی لینک خام گیت‌هاب ممکن نیست — اگر داشبورد Next.js را (طبق README) دیپلوی کنید، "
+        "این عدد با هر اجرای Action به‌روزرسانی می‌شود."
+        if not users
+        else f"تا به‌حالا {fa(users)} کاربر یکتا از ساب استفاده کرده‌اند ({fa(hits)} دریافت)."
+    )
+
+    if not rows:
+        rows = "      <li class='row' style='color:var(--dim)'>در انتظار اولین سینک GitHub Action…</li>"
+
+    html = TEMPLATE.substitute(
+        SUB_URL=sub_url,
+        STATS_URL=stats_url,
+        REPO_URL=repo_url,
+        LAST_RUN_ISO=last_run,
+        NEXT_RUN_ISO=next_run,
+        LAST_RUN_REL=rel_fa(last_run),
+        TOTAL_FA=fa(total),
+        FRESH_FA=fa(int(stats.get("fresh24h", 0))),
+        USERS_FA=fa(users),
+        USERS_NOTE=users_note,
+        USERS_NOTE_LONG=users_note_long,
+        CHANNEL_ROWS=rows,
+        ICON_LAYERS=_ICONS["layers"],
+        ICON_ZAP=_ICONS["zap"],
+        ICON_USERS=_ICONS["users"],
+        ICON_SYNC=_ICONS["sync"],
+        ICON_SAT=_ICONS["sat"],
+        ICON_CLOCK=_ICONS["clock"],
+        ICON_TAG=_ICONS["tag"],
+        ICON_BRANCH=_ICONS["branch"],
+    )
+
+    DOCS.mkdir(exist_ok=True)
+    (DOCS / ".nojekyll").write_text("", encoding="utf-8")
+    (DOCS / "index.html").write_text(html, encoding="utf-8")
+    print(f"docs/index.html rendered ({len(html)} bytes) → {pages_url}")
+
+    # keep a permanent LIVE SITE block in README up to date
+    if README.exists():
+        txt = README.read_text(encoding="utf-8")
+        block = (
+            "<!-- AXIOM:PAGES:START -->\n"
+            f"**داشبورد زنده (GitHub Pages):** {pages_url}  \n"
+            "**لینک ساب:** `{sub_url}`\n"
+            "<!-- AXIOM:PAGES:END -->"
+        )
+        if RX_PAGES_BLOCK.search(txt):
+            txt = RX_PAGES_BLOCK.sub(lambda _: block, txt)
+            README.write_text(txt, encoding="utf-8")
+            print("README live-site block updated")
+    return 0
+
+
+def rel_fa(iso: str) -> str:
+    if not iso:
+        return "—"
+    try:
+        dt = datetime.fromisoformat(iso)
+        secs = int((datetime.now(timezone.utc) - dt).total_seconds())
+    except Exception:
+        return "—"
+    if secs < 60:
+        return "همین حالا"
+    if secs < 3600:
+        return f"{fa(secs // 60)} دقیقه پیش"
+    if secs < 86400:
+        return f"{fa(secs // 3600)} ساعت پیش"
+    return f"{fa(secs // 86400)} روز پیش"
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

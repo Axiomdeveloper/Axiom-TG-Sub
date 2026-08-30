@@ -1,0 +1,21 @@
+# ---------- secrets (NEVER commit) ----------
+.env
+.env*
+!.env.example
+
+# ---------- node / build output ----------
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# ---------- OS / editors ----------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ---------- misc ----------
+*.log
+dist/

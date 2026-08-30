@@ -1,3 +1,12 @@
+vless://74da7b3f-d352-4aac-bca3-7c9574abae03@95.216.142.36:1080?security=none&encryption=none&host=amp-api-edge.apps.apple.com&headerType=http&type=tcp#Axiom%20TG
+vless://34c6b520-fa66-49e9-a337-b7a6a3af28ba@land.hostingdayam.com.tr:2053?path=%2Ffi-cdn&security=tls&alpn=h3%2Ch2%2Chttp%2F1.1&encryption=none&host=land.hostingdayam.com.tr&fp=chrome&type=ws&sni=land.hostingdayam.com.tr#Axiom%20TG
+vless://3eb1c85a-a0bc-1c6e-bd80-ada5fb05ae48@69.46.46.26:443?path=%2Fws%2F3eb1c85a-a0bc-1c6e-bd80-ada5fb05ae48&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host=cobalt-prairie-172d-production.up.railway.app&fp=ios&type=ws&allowInsecure=0&sni=cobalt-prairie-172d-production.up.railway.app#Axiom%20TG
+vless://87c771f9-f42c-4a29-8281-ce9135c1802f@marzban-node1-production-ef8e.up.railway.app:443?path=%2Fvless&security=tls&alpn=h2&encryption=none&insecure=0&host=marzban-node1-production-ef8e.up.railway.app&fp=ios&type=ws&allowInsecure=0&sni=marzban-node1-production-ef8e.up.railway.app#Axiom%20TG
+vless://255386a8-aec5-4425-bfe7-ca49b7448deb@193.160.32.36:2053?security=reality&encryption=none&pbk=Sh2F8IDDBaFvXPI59IwN-25UR1G0fjXNmuVqwNbTpUk&headerType=none&fp=chrome&type=tcp&sni=play.google.com&sid=c87bfa39a28a95b9#Axiom%20TG
+vless://533895c1-c9c4-a99a-51f8-68137bc8b24a@69.46.46.20:443?path=%2Fws%2F533895c1-c9c4-a99a-51f8-68137bc8b24a&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host=cedar-lantern-d4f0-production.up.railway.app&fp=ios&type=ws&allowInsecure=0&sni=cedar-lantern-d4f0-production.up.railway.app#Axiom%20TG
+hysteria2://1w61o8j0slf0q9yj@giftcard.gateway-stream.com:52024?security=tls&obfs=salamander&obfs-password=fuw2k1ddrouwxr3u&insecure=0&sni=giftcard.gateway-stream.com#Axiom%20TG
+ss://YWVzLTI1Ni1nY206ZDFmYTJmNGI5OGEzOGJjOA@194.87.47.204:10901#Axiom%20TG
+vless://dc8eccdb-ecfa-435f-9ac1-5dc4882e7b51@104.16.72.41:80?path=%2Fhttp&security=none&encryption=none&host=de.vpnbase.net&type=ws#Axiom%20TG
 vless://93dac4b8-3879-4179-abdb-9666a9e2ca8d@87.120.84.32:8443?path=%2F&security=none&encryption=none&type=ws#Axiom%20TG
 vless://d499fa8c-2e14-4bd5-a3ca-73fae7f04cb5@a2.arshia-nova.ir:443?path=%2F&security=tls&alpn=h2&encryption=none&host=c12.com&fp=firefox&type=ws&sni=ssl.fastly.com#Axiom%20TG
 vless://0971f6ed-9881-45f4-9cf9-eedd2526aab6@62.238.50.19:44328?encryption=none&security=none&type=grpc&mode=gun&authority=&serviceName=#Axiom%20TG

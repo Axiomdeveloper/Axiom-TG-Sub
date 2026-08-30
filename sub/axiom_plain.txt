@@ -1,3 +1,5 @@
+vless://93dac4b8-3879-4179-abdb-9666a9e2ca8d@87.120.84.32:8443?path=%2F&security=none&encryption=none&type=ws#Axiom%20TG
+vless://d499fa8c-2e14-4bd5-a3ca-73fae7f04cb5@a2.arshia-nova.ir:443?path=%2F&security=tls&alpn=h2&encryption=none&host=c12.com&fp=firefox&type=ws&sni=ssl.fastly.com#Axiom%20TG
 vless://0971f6ed-9881-45f4-9cf9-eedd2526aab6@62.238.50.19:44328?encryption=none&security=none&type=grpc&mode=gun&authority=&serviceName=#Axiom%20TG
 hysteria2://jbmuokj7p4kg4h4s@giftcard.gateway-stream.com:52029?security=tls&fm=%7B%22udp%22%3A%5B%7B%22settings%22%3A%7B%22password%22%3A%22fuw2k1ddrouwxr3u%22%7D%2C%22type%22%3A%22salamander%22%7D%5D%7D&sni=giftcard.gateway-stream.com&allowinsecure=0#Axiom%20TG
 vless://1206bad5-dcc9-410e-9595-d9fe9ee54085@5.188.26.176:7443?flow=xtls-rprx-vision&encryption=none&security=reality&sni=max.ru&fp=qq&pbk=kGxErpyTzyh6Md1MLGYaR_0j3X6jrCzgTDRqRbbfOCg&sid=a1b2c3d4&allowinsecure=0&type=tcp&headerType=none#Axiom%20TG

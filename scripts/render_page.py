@@ -180,6 +180,35 @@ ul{list-style:none;padding:0}
 footer{border-top:1px solid var(--line);background:rgba(2,4,9,.4);margin-top:40px}
 .ft{max-width:1060px;margin:0 auto;padding:26px 20px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;font-size:12px;color:var(--dim)}
 .note{border:1px solid rgba(0,224,164,.15);background:rgba(0,224,164,.05);border-radius:16px;padding:14px 16px;font-size:11.5px;line-height:1.9;color:rgba(212,255,238,.85);margin-top:20px}
+.staranim{animation:starflow 2.8s ease-in-out infinite;will-change:transform}
+@keyframes starflow{0%,100%{transform:scale(1) rotate(0deg);filter:drop-shadow(0 0 12px rgba(255,176,32,.35))}50%{transform:scale(1.07) rotate(-4deg);filter:drop-shadow(0 0 26px rgba(0,224,164,.55))}}
+.card,.chan,.pstep{transform-style:preserve-3d;will-change:transform}
+.ic,.ic2{transform:translateZ(26px)}
+body{-webkit-tap-highlight-color:transparent}
+@media (max-width:820px){
+.hdr{flex-wrap:wrap;justify-content:center;padding:12px 14px}
+.hdr .pill{display:none}
+.hero{padding:70px 0 56px}
+h1{font-size:clamp(30px,9vw,44px)}
+.sub{font-size:13px;line-height:1.95;padding:0 6px}
+.suburl{max-width:100%;padding:6px 6px 6px 14px;gap:8px}
+.suburl code{font-size:10.5px}
+.chips{gap:6px}
+section{padding:40px 0}
+.stat{padding:20px}.stat .num{font-size:30px}
+.row{flex-wrap:wrap;gap:8px 10px;padding:12px 16px}
+.ch{min-width:0;flex:1 1 45%;font-size:12px}
+.barwrap{flex:1 1 100%;order:3}
+.cnt{width:auto;min-width:56px;text-align:left}
+.chanhead span:last-child{display:none}
+.panel{padding:20px}
+.urlbox code{font-size:10.5px}
+.qr{flex-direction:column;align-items:flex-start}
+.ghost{font-size:clamp(56px,18vw,120px);top:64px}
+.actions .btn{font-size:12.5px;padding:10px 16px}
+.ft{justify-content:center;text-align:center}
+}
+@media (hover:none), (pointer:coarse){.card:hover{transform:none;box-shadow:none}.bm:hover{transform:none}}
 </style>
 </head>
 <body>
@@ -239,10 +268,10 @@ footer{border-top:1px solid var(--line);background:rgba(2,4,9,.4);margin-top:40p
       <div class="sub2">استخراج‌شده از آخرین پست‌های کانال‌ها</div>
     </div>
     <div class="glass card stat">
-      <span class="ic i-m">$ICON_USERS</span>
-      <div class="num" id="stUsers">$USERS_FA</div>
-      <div class="lbl">کاربران یکتای ساب</div>
-      <div class="sub2" id="stHitsSub">$USERS_NOTE</div>
+      <span class="ic i-m">$ICON_SAT</span>
+      <div class="num" id="stChan">$CHAN_OK_FA</div>
+      <div class="lbl">کانال‌های سالم</div>
+      <div class="sub2">از $CHAN_TOTAL_FA کانال تلگرامی در آخرین اسکن</div>
     </div>
     <div class="glass card stat">
       <span class="ic i-a">$ICON_SYNC</span>
@@ -283,12 +312,14 @@ footer{border-top:1px solid var(--line);background:rgba(2,4,9,.4);margin-top:40p
         <div class="frame"><img id="qrImg" alt="QR of subscription" width="150" height="150"/></div>
         <p style="font-size:12px;color:var(--dim);line-height:1.9;max-width:260px">در v2rayNG گزینه‌ی <b style="color:#e6e8f2">اسکن QR</b> را در صفحه‌ی Subscription بزنید تا ساب مستقیم اضافه شود.</p>
       </div>
-      <div class="note" id="usersNote">$USERS_NOTE_LONG</div>
+      <div class="note">نکته: کلاینت‌ها خودشان هر چند ساعت لیست را تازه می‌کنند؛ برای گرفتن آخرین کانفیگ‌ها لحظه‌ای، روی ساب دستی Update بزن. آمار این صفحه هر دقیقه از ریپو تازه می‌شود.</div>
     </div>
     <div class="glass card panel">
       <b style="font-size:15px;color:#f1f2fa">کلاینت‌های پیشنهادی</b>
       <ul class="clist" style="margin-top:18px">
         <li><span class="mono" dir="ltr">v2rayNG</span><span class="pl">Android</span></li>
+        <li><span class="mono" dir="ltr">PattNG</span><span class="pl">Windows</span></li>
+        <li><span class="mono" dir="ltr">PattNG Mobile</span><span class="pl">Android</span></li>
         <li><span class="mono" dir="ltr">Hiddify</span><span class="pl">همه‌ی پلتفرم‌ها</span></li>
         <li><span class="mono" dir="ltr">Streisand / FoXray</span><span class="pl">iOS</span></li>
         <li><span class="mono" dir="ltr">NekoBox</span><span class="pl">Android / PC</span></li>
@@ -307,6 +338,21 @@ footer{border-top:1px solid var(--line);background:rgba(2,4,9,.4);margin-top:40p
     <div class="glass card pstep"><span class="n">03</span><div class="ic2">$ICON_TAG</div><div class="t">ری‌نیم به Axiom TG</div><div class="d">نام همه‌ی کانفیگ‌ها یکدست می‌شود</div></div>
     <div class="glass card pstep"><span class="n">04</span><div class="ic2">$ICON_SYNC</div><div class="t">آرشیو ۴۸ ساعته</div><div class="d">کانفیگ‌های دو روز پیش خودکار حذف می‌شوند</div></div>
     <div class="glass card pstep"><span class="n">05</span><div class="ic2">$ICON_BRANCH</div><div class="t">انتشار روی Pages</div><div class="d">ساب + این داشبورد خودکار کامیت و منتشر می‌شود</div></div>
+  </div>
+</section>
+
+<section class="wrap" style="text-align:center">
+  <div class="glass card" style="border-radius:32px;padding:48px 26px;position:relative;overflow:hidden">
+    <div aria-hidden="true" style="position:absolute;top:-90px;left:50%;transform:translateX(-50%);width:520px;height:220px;border-radius:9999px;background:rgba(0,224,164,.09);filter:blur(80px);pointer-events:none"></div>
+    <span class="staranim" style="position:relative;display:inline-grid;place-items:center;width:80px;height:80px;border-radius:24px;border:1px solid rgba(255,176,32,.3);background:rgba(255,176,32,.09);color:#ffb020">
+      <svg width="38" height="38" viewBox="0 0 24 24" fill="currentColor" fill-opacity="0.28" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    </span>
+    <h2 style="position:relative;margin-top:24px">اگر پروژه بدردت خورد، ریپو رو <span class="grad">ستار</span> کن</h2>
+    <p class="lead" style="position:relative;margin:14px auto 0;max-width:560px">ستاره‌ی گیت‌هاب رایگان است ولی پروژه را زنده نگه می‌دارد — با آن، امکانات بعدی سریع‌تر می‌آیند: کانال‌های بیشتر، خروجی Clash و چند ساب هم‌زمان.</p>
+    <div style="position:relative;margin-top:26px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center">
+      <a class="btn bm" href="$REPO_URL" target="_blank" rel="noreferrer">به ریپو ستار بده</a>
+      <a class="btn bg1" href="$REPO_URL/issues/new" target="_blank" rel="noreferrer">گزارش باگ یا درخواست کانال جدید</a>
+    </div>
   </div>
 </section>
 </main>
@@ -374,7 +420,8 @@ function refresh(_) {
     fetch(STATS_URL + "?t=" + Date.now()).then(function (r) { return r.ok ? r.json() : null; }).then(function (s) {
       if (!s) return;
       setText("stTotal", faN(s.total)); setText("stFresh", faN(s.fresh24h));
-      setText("stUsers", faN(s.users)); setText("heroTotal", faN(s.total));
+      var okc = 0; (s.perChannel || []).forEach(function (c) { if (c.ok) okc++; });
+      setText("stChan", faN(okc)); setText("heroTotal", faN(s.total));
       if (s.lastRun) { LAST_RUN = s.lastRun; var d = new Date(s.lastRun).getTime(); NEXT_RUN = new Date(d + 5 * 3600 * 1000).toISOString(); }
       tick();
     }).catch(function () {});
@@ -382,6 +429,30 @@ function refresh(_) {
 }
 function setText(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; }
 setInterval(tick, 1000); setInterval(refresh, 60000); tick();
+
+/* 3D tilt on cards — pointer devices only */
+(function () {
+  var fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!fine || reduced) return;
+  function bind(el, max) {
+    el.addEventListener("pointermove", function (e) {
+      var r = el.getBoundingClientRect();
+      var px = (e.clientX - r.left) / r.width - 0.5;
+      var py = (e.clientY - r.top) / r.height - 0.5;
+      el.style.transition = "transform .12s ease-out";
+      el.style.transform = "perspective(1000px) rotateX(" + (-py * max).toFixed(2) + "deg) rotateY(" + (px * max).toFixed(2) + "deg)";
+    });
+    el.addEventListener("pointerleave", function () {
+      el.style.transition = "transform .7s cubic-bezier(.16,1,.3,1)";
+      el.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg)";
+      clearTimeout(el._t);
+      el._t = setTimeout(function () { el.style.transform = ""; el.style.transition = ""; }, 700);
+    });
+  }
+  var els = document.querySelectorAll(".card, .chan, .pstep");
+  for (var i = 0; i < els.length; i++) bind(els[i], els[i].classList.contains("chan") ? 1.8 : 5);
+})();
 </script>
 </body>
 </html>
@@ -403,22 +474,9 @@ def main() -> int:
     except Exception:
         next_run = ""
 
-    rows, _ok = channel_rows(stats)
+    rows, ok_count = channel_rows(stats)
     total = int(stats.get("total", 0))
-    users = int(stats.get("users", 0))
-    hits = int(stats.get("hits", 0))
-
-    users_note = (
-        f"مجموع دریافت‌ها: {fa(hits)}"
-        if hits
-        else "با اتصال داشبورد Next.js روشن می‌شود"
-    )
-    users_note_long = (
-        "شمارش کاربران روی لینک خام گیت‌هاب ممکن نیست — اگر داشبورد Next.js را (طبق README) دیپلوی کنید، "
-        "این عدد با هر اجرای Action به‌روزرسانی می‌شود."
-        if not users
-        else f"تا به‌حالا {fa(users)} کاربر یکتا از ساب استفاده کرده‌اند ({fa(hits)} دریافت)."
-    )
+    chans = stats.get("perChannel") or []
 
     if not rows:
         rows = "      <li class='row' style='color:var(--dim)'>در انتظار اولین سینک GitHub Action…</li>"
@@ -432,13 +490,11 @@ def main() -> int:
         LAST_RUN_REL=rel_fa(last_run),
         TOTAL_FA=fa(total),
         FRESH_FA=fa(int(stats.get("fresh24h", 0))),
-        USERS_FA=fa(users),
-        USERS_NOTE=users_note,
-        USERS_NOTE_LONG=users_note_long,
+        CHAN_OK_FA=fa(ok_count),
+        CHAN_TOTAL_FA=fa(len(chans)),
         CHANNEL_ROWS=rows,
         ICON_LAYERS=_ICONS["layers"],
         ICON_ZAP=_ICONS["zap"],
-        ICON_USERS=_ICONS["users"],
         ICON_SYNC=_ICONS["sync"],
         ICON_SAT=_ICONS["sat"],
         ICON_CLOCK=_ICONS["clock"],

@@ -34,6 +34,7 @@ body {
   color: #d4d6e3;
   overflow-x: hidden;
   min-height: 100svh;
+  -webkit-tap-highlight-color: transparent;
 }
 
 ::selection {
@@ -113,6 +114,28 @@ body {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
+/* ---------- 3D tilt & parallax ---------- */
+.tilt {
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+.tilt-layer {
+  transform: translateZ(32px);
+}
+.tilt-layer-small {
+  transform: translateZ(16px);
+}
+.p3d {
+  perspective: 1100px;
+}
+.float-card {
+  box-shadow:
+    0 30px 70px -20px rgba(0, 0, 0, 0.8),
+    0 10px 40px -18px rgba(0, 224, 164, 0.28),
+    0 0 0 1px rgba(148, 163, 216, 0.08) inset;
+}
+
 /* ---------- reveal on scroll ---------- */
 .reveal {
   opacity: 0;
@@ -148,6 +171,9 @@ body {
 .btn.btn-xs {
   padding: 7px 12px;
   font-size: 12px;
+}
+.btn:active {
+  transform: scale(0.965);
 }
 .btn-mint {
   background: linear-gradient(120deg, #00e0a4, #00b4d8);
@@ -194,6 +220,7 @@ body {
   width: 8px;
   height: 8px;
   border-radius: 999px;
+  flex-shrink: 0;
 }
 .dot::after {
   content: "";
@@ -254,9 +281,6 @@ body {
 .hairline {
   border-color: rgba(148, 163, 216, 0.12);
 }
-kbd.mono {
-  font-family: var(--font-mono);
-}
 
 @keyframes marquee {
   to {
@@ -287,12 +311,35 @@ kbd.mono {
     transform: scaleX(1);
   }
 }
-@keyframes sweep {
-  from {
-    background-position: -200% 0;
+
+/* ---------- star pulse ---------- */
+.staranim {
+  animation: starflow 2.8s ease-in-out infinite;
+  will-change: transform;
+}
+@keyframes starflow {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    filter: drop-shadow(0 0 12px rgba(255, 176, 32, 0.35));
   }
-  to {
-    background-position: 200% 0;
+  50% {
+    transform: scale(1.07) rotate(-4deg);
+    filter: drop-shadow(0 0 26px rgba(0, 224, 164, 0.55));
+  }
+}
+
+/* ---------- touch devices: no sticky hover ---------- */
+@media (hover: none), (pointer: coarse) {
+  .card:hover {
+    transform: none;
+    box-shadow: 0 10px 34px -16px rgba(0, 0, 0, 0.8);
+  }
+  .btn-mint:hover {
+    transform: none;
+  }
+  .marquee-track {
+    animation-duration: 40s;
   }
 }
 
@@ -308,6 +355,11 @@ kbd.mono {
     transform: none;
     filter: none;
     transition: none;
+  }
+  .tilt,
+  .tilt-layer,
+  .tilt-layer-small {
+    transform: none !important;
   }
   html {
     scroll-behavior: auto;

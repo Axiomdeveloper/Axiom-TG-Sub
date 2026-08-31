@@ -1,16 +1,16 @@
 "use client";
 
-import { Activity, Layers, RefreshCw, Users, Zap } from "lucide-react";
+import { Activity, Layers, RefreshCw, Satellite, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { faDateTime, faNum, relTimeFa } from "@/lib/fa";
-import { CountUp, Reveal, SectionHeading } from "./ui";
+import { CountUp, Reveal, SectionHeading, Tilt } from "./ui";
 
 interface Props {
   total: number;
   fresh24h: number;
-  users: number;
-  hits: number;
+  channelsOk: number;
+  channelsTotal: number;
   lastRun: string | null;
   nextRun: string | null;
   synced: boolean;
@@ -51,7 +51,7 @@ function SyncCountdown({ lastRun, nextRun, synced }: { lastRun: string | null; n
   );
 }
 
-export default function StatsBento({ total, fresh24h, users, hits, lastRun, nextRun, synced }: Props) {
+export default function StatsBento({ total, fresh24h, channelsOk, channelsTotal, lastRun, nextRun, synced }: Props) {
   const cards = [
     {
       icon: Layers,
@@ -68,56 +68,60 @@ export default function StatsBento({ total, fresh24h, users, hits, lastRun, next
       sub: "استخراج‌شده از آخرین پست‌های کانال‌ها",
     },
     {
-      icon: Users,
+      icon: Satellite,
       accent: "mint",
-      label: "کاربران یکتای ساب",
-      value: users,
-      sub: hits > 0 ? `مجموع دریافت‌ها: ${faNum(hits)}` : "شمارش از اولین اتصال",
+      label: "کانال‌های سالم",
+      value: synced ? channelsOk : 0,
+      sub: synced ? `از ${faNum(channelsTotal)} کانال تلگرامی در آخرین اسکن` : "پس از اولین سینک نمایش داده می‌شود",
     },
   ];
 
   return (
-    <section id="stats" className="relative z-10 mx-auto w-full max-w-6xl px-4 py-24 md:px-6">
+    <section id="stats" className="relative z-10 mx-auto w-full max-w-6xl px-4 py-16 sm:py-24 md:px-6">
       <SectionHeading
         kicker="// LIVE STATS"
         title="آمار زنده‌ی شبکه"
-        desc="داده‌ها مستقیم از آخرین خروجی GitHub Action و لِجِر اتصال‌های ساب خوانده می‌شوند."
+        desc="داده‌ها مستقیم از آخرین خروجی GitHub Action خوانده می‌شوند."
       />
 
-      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+      <div className="p3d grid gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-4">
         {cards.map((c, i) => (
           <Reveal key={c.label} delay={i * 90}>
-            <div className="glass card g-border h-full rounded-3xl p-6">
-              <div
-                className={`mb-5 inline-flex rounded-2xl border p-2.5 ${
-                  c.accent === "mint" ? "border-mint/25 text-mint bg-mint/5" : "border-viol/25 text-viol bg-viol/5"
-                }`}
-              >
-                <c.icon size={20} />
+            <Tilt intensity={7}>
+              <div className="glass card g-border h-full rounded-3xl p-6">
+                <div
+                  className={`tilt-layer mb-5 inline-flex rounded-2xl border p-2.5 ${
+                    c.accent === "mint" ? "border-mint/25 text-mint bg-mint/5" : "border-viol/25 text-viol bg-viol/5"
+                  }`}
+                >
+                  <c.icon size={20} />
+                </div>
+                <p className="font-mono text-3xl font-bold text-zinc-50 sm:text-4xl" dir="ltr">
+                  <CountUp value={c.value} />
+                </p>
+                <p className="mt-3 text-sm font-bold text-zinc-200">{c.label}</p>
+                <p className="mt-1.5 text-xs leading-5 text-zinc-500">{c.sub}</p>
               </div>
-              <p className="font-mono text-4xl font-bold text-zinc-50" dir="ltr">
-                <CountUp value={c.value} />
-              </p>
-              <p className="mt-3 text-sm font-bold text-zinc-200">{c.label}</p>
-              <p className="mt-1.5 text-xs leading-5 text-zinc-500">{c.sub}</p>
-            </div>
+            </Tilt>
           </Reveal>
         ))}
 
         <Reveal delay={270}>
-          <div className="glass card g-border h-full rounded-3xl p-6">
-            <div className="mb-5 inline-flex rounded-2xl border border-amberx/25 bg-amberx/5 p-2.5 text-amberx">
-              <RefreshCw size={20} />
+          <Tilt intensity={7}>
+            <div className="glass card g-border h-full rounded-3xl p-6">
+              <div className="tilt-layer mb-5 inline-flex rounded-2xl border border-amberx/25 bg-amberx/5 p-2.5 text-amberx">
+                <RefreshCw size={20} />
+              </div>
+              <p className="flex items-center gap-2 text-sm font-bold text-zinc-200">
+                <Activity size={14} className="text-amberx" />
+                چرخه‌ی سینک خودکار
+              </p>
+              <p className="mt-1.5 text-xs text-zinc-500" title={lastRun ? faDateTime(lastRun) : ""}>
+                {synced ? faDateTime(lastRun) : "هنوز سینکی ثبت نشده"}
+              </p>
+              <SyncCountdown lastRun={lastRun} nextRun={nextRun} synced={synced} />
             </div>
-            <p className="flex items-center gap-2 text-sm font-bold text-zinc-200">
-              <Activity size={14} className="text-amberx" />
-              چرخه‌ی سینک خودکار
-            </p>
-            <p className="mt-1.5 text-xs text-zinc-500" title={lastRun ? faDateTime(lastRun) : ""}>
-              {synced ? faDateTime(lastRun) : "هنوز سینکی ثبت نشده"}
-            </p>
-            <SyncCountdown lastRun={lastRun} nextRun={nextRun} synced={synced} />
-          </div>
+          </Tilt>
         </Reveal>
       </div>
     </section>

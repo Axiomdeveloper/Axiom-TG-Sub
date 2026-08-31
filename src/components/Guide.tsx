@@ -1,7 +1,7 @@
 import { Clock, GitCommitHorizontal, Radio, RefreshCcw, SatelliteDish, Tag, TerminalSquare } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-import { Reveal, SectionHeading } from "./ui";
+import { Reveal, SectionHeading, Tilt } from "./ui";
 
 const PIPELINE: { icon: LucideIcon; title: string; desc: string }[] = [
   {
@@ -51,26 +51,28 @@ const STEPS: { n: string; title: string; desc: string }[] = [
 
 export default function Guide() {
   return (
-    <section id="guide" className="relative z-10 mx-auto w-full max-w-6xl px-4 py-24 md:px-6">
+    <section id="guide" className="relative z-10 mx-auto w-full max-w-6xl px-4 py-16 sm:py-24 md:px-6">
       <SectionHeading
         kicker="// PIPELINE"
         title="خط لوله‌ی کاملاً خودکار"
         desc="بدون سرور همیشه‌روشن — فقط یک وورک‌فلوی GitHub Actions که هر ۵ ساعت بیدار می‌شود."
       />
 
-      <div className="grid gap-4 md:grid-cols-5">
+      <div className="p3d grid gap-4 md:grid-cols-5">
         {PIPELINE.map((p, i) => (
           <Reveal key={p.title} delay={i * 80}>
+            <Tilt intensity={5}>
             <div className="glass card relative h-full rounded-3xl border hairline p-5 text-center">
               <span className="absolute -top-3 right-5 rounded-full border hairline bg-void px-2.5 py-0.5 font-mono text-[10px] text-mint" dir="ltr">
                 {`0${i + 1}`}
               </span>
-              <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-2xl border border-mint/20 bg-mint/5 text-mint">
+              <div className="tilt-layer-small mx-auto mb-4 grid h-12 w-12 place-items-center rounded-2xl border border-mint/20 bg-mint/5 text-mint">
                 <p.icon size={20} />
               </div>
               <h3 className="text-sm font-black text-zinc-100">{p.title}</h3>
               <p className="mt-2 text-[11px] leading-5 text-zinc-500">{p.desc}</p>
             </div>
+            </Tilt>
           </Reveal>
         ))}
       </div>

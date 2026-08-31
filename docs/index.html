@@ -99,6 +99,35 @@ ul{list-style:none;padding:0}
 footer{border-top:1px solid var(--line);background:rgba(2,4,9,.4);margin-top:40px}
 .ft{max-width:1060px;margin:0 auto;padding:26px 20px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;font-size:12px;color:var(--dim)}
 .note{border:1px solid rgba(0,224,164,.15);background:rgba(0,224,164,.05);border-radius:16px;padding:14px 16px;font-size:11.5px;line-height:1.9;color:rgba(212,255,238,.85);margin-top:20px}
+.staranim{animation:starflow 2.8s ease-in-out infinite;will-change:transform}
+@keyframes starflow{0%,100%{transform:scale(1) rotate(0deg);filter:drop-shadow(0 0 12px rgba(255,176,32,.35))}50%{transform:scale(1.07) rotate(-4deg);filter:drop-shadow(0 0 26px rgba(0,224,164,.55))}}
+.card,.chan,.pstep{transform-style:preserve-3d;will-change:transform}
+.ic,.ic2{transform:translateZ(26px)}
+body{-webkit-tap-highlight-color:transparent}
+@media (max-width:820px){
+.hdr{flex-wrap:wrap;justify-content:center;padding:12px 14px}
+.hdr .pill{display:none}
+.hero{padding:70px 0 56px}
+h1{font-size:clamp(30px,9vw,44px)}
+.sub{font-size:13px;line-height:1.95;padding:0 6px}
+.suburl{max-width:100%;padding:6px 6px 6px 14px;gap:8px}
+.suburl code{font-size:10.5px}
+.chips{gap:6px}
+section{padding:40px 0}
+.stat{padding:20px}.stat .num{font-size:30px}
+.row{flex-wrap:wrap;gap:8px 10px;padding:12px 16px}
+.ch{min-width:0;flex:1 1 45%;font-size:12px}
+.barwrap{flex:1 1 100%;order:3}
+.cnt{width:auto;min-width:56px;text-align:left}
+.chanhead span:last-child{display:none}
+.panel{padding:20px}
+.urlbox code{font-size:10.5px}
+.qr{flex-direction:column;align-items:flex-start}
+.ghost{font-size:clamp(56px,18vw,120px);top:64px}
+.actions .btn{font-size:12.5px;padding:10px 16px}
+.ft{justify-content:center;text-align:center}
+}
+@media (hover:none), (pointer:coarse){.card:hover{transform:none;box-shadow:none}.bm:hover{transform:none}}
 </style>
 </head>
 <body>
@@ -136,7 +165,7 @@ footer{border-top:1px solid var(--line);background:rgba(2,4,9,.4);margin-top:40p
       <span class="pill">۸ کانال فعال</span>
       <span class="pill">به‌روزرسانی: هر ۵ ساعت</span>
       <span class="pill">نگهداری: ۴۸ ساعت</span>
-      <span class="pill" style="color:var(--mint)"><span id="heroTotal">۲۸۰</span> کانفیگ همین حالا داخل ساب</span>
+      <span class="pill" style="color:var(--mint)"><span id="heroTotal">۳۲۹</span> کانفیگ همین حالا داخل ساب</span>
     </div>
   </div>
 </section>
@@ -147,21 +176,21 @@ footer{border-top:1px solid var(--line);background:rgba(2,4,9,.4);margin-top:40p
   <div class="grid stats">
     <div class="glass card stat">
       <span class="ic i-m"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg></span>
-      <div class="num" id="stTotal">۲۸۰</div>
+      <div class="num" id="stTotal">۳۲۹</div>
       <div class="lbl">مجموع کانفیگ‌های ساب</div>
       <div class="sub2">فعال در آرشیو‌ی ۴۸ ساعته</div>
     </div>
     <div class="glass card stat">
       <span class="ic i-v"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg></span>
-      <div class="num" id="stFresh">۱۵۸</div>
+      <div class="num" id="stFresh">۱۷۰</div>
       <div class="lbl">تازه‌های ۲۴ ساعت اخیر</div>
       <div class="sub2">استخراج‌شده از آخرین پست‌های کانال‌ها</div>
     </div>
     <div class="glass card stat">
-      <span class="ic i-m"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-      <div class="num" id="stUsers">۰</div>
-      <div class="lbl">کاربران یکتای ساب</div>
-      <div class="sub2" id="stHitsSub">با اتصال داشبورد Next.js روشن می‌شود</div>
+      <span class="ic i-m"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10a7.31 7.31 0 0 0 10 10Z"/><path d="m9 15 3-3"/><path d="M17 13a6 6 0 0 0-6-6"/><path d="M21 13A10 10 0 0 0 11 3"/></svg></span>
+      <div class="num" id="stChan">۸</div>
+      <div class="lbl">کانال‌های سالم</div>
+      <div class="sub2">از ۸ کانال تلگرامی در آخرین اسکن</div>
     </div>
     <div class="glass card stat">
       <span class="ic i-a"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg></span>
@@ -184,51 +213,51 @@ footer{border-top:1px solid var(--line);background:rgba(2,4,9,.4);margin-top:40p
         <span class="dot" style="color:#00e0a4;background:#00e0a4" title="OK"></span>
         <a class="ch mono" dir="ltr" href="https://t.me/s/vpn_Click" target="_blank" rel="noreferrer">@vpn_Click</a>
         <span class="barwrap" dir="ltr"><span class="bar" style="width:100%"></span></span>
-        <span class="cnt mono">۱۰۰<span class="fresh">+۶۶ تازه</span></span>
+        <span class="cnt mono">۱۲۲<span class="fresh">+۶۹ تازه</span></span>
       </li>
       <li class="row">
         <span class="dot" style="color:#00e0a4;background:#00e0a4" title="OK"></span>
         <a class="ch mono" dir="ltr" href="https://t.me/s/V2rayng_Fast" target="_blank" rel="noreferrer">@V2rayng_Fast</a>
-        <span class="barwrap" dir="ltr"><span class="bar" style="width:75%"></span></span>
-        <span class="cnt mono">۷۵<span class="fresh">+۳۲ تازه</span></span>
+        <span class="barwrap" dir="ltr"><span class="bar" style="width:73%"></span></span>
+        <span class="cnt mono">۸۹<span class="fresh">+۳۹ تازه</span></span>
       </li>
       <li class="row">
         <span class="dot" style="color:#00e0a4;background:#00e0a4" title="OK"></span>
         <a class="ch mono" dir="ltr" href="https://t.me/s/FreakConfig" target="_blank" rel="noreferrer">@FreakConfig</a>
-        <span class="barwrap" dir="ltr"><span class="bar" style="width:49%"></span></span>
-        <span class="cnt mono">۴۹<span class="fresh">+۴۶ تازه</span></span>
-      </li>
-      <li class="row">
-        <span class="dot" style="color:#00e0a4;background:#00e0a4" title="OK"></span>
-        <a class="ch mono" dir="ltr" href="https://t.me/s/V2rayBaaz" target="_blank" rel="noreferrer">@V2rayBaaz</a>
-        <span class="barwrap" dir="ltr"><span class="bar" style="width:16%"></span></span>
-        <span class="cnt mono">۱۶<span class="fresh">+۹ تازه</span></span>
-      </li>
-      <li class="row">
-        <span class="dot" style="color:#00e0a4;background:#00e0a4" title="OK"></span>
-        <a class="ch mono" dir="ltr" href="https://t.me/s/V2RAYROZ" target="_blank" rel="noreferrer">@V2RAYROZ</a>
-        <span class="barwrap" dir="ltr"><span class="bar" style="width:14%"></span></span>
-        <span class="cnt mono">۱۴<span class="fresh">+۶ تازه</span></span>
-      </li>
-      <li class="row">
-        <span class="dot" style="color:#00e0a4;background:#00e0a4" title="OK"></span>
-        <a class="ch mono" dir="ltr" href="https://t.me/s/V2rayNGX" target="_blank" rel="noreferrer">@V2rayNGX</a>
-        <span class="barwrap" dir="ltr"><span class="bar" style="width:13%"></span></span>
-        <span class="cnt mono">۱۳</span>
+        <span class="barwrap" dir="ltr"><span class="bar" style="width:44%"></span></span>
+        <span class="cnt mono">۵۴<span class="fresh">+۴۷ تازه</span></span>
       </li>
       <li class="row">
         <span class="dot" style="color:#00e0a4;background:#00e0a4" title="OK"></span>
         <a class="ch mono" dir="ltr" href="https://t.me/s/prrofile_purple" target="_blank" rel="noreferrer">@prrofile_purple</a>
-        <span class="barwrap" dir="ltr"><span class="bar" style="width:12%"></span></span>
-        <span class="cnt mono">۱۲<span class="fresh">+۸ تازه</span></span>
+        <span class="barwrap" dir="ltr"><span class="bar" style="width:16%"></span></span>
+        <span class="cnt mono">۱۹<span class="fresh">+۸ تازه</span></span>
+      </li>
+      <li class="row">
+        <span class="dot" style="color:#00e0a4;background:#00e0a4" title="OK"></span>
+        <a class="ch mono" dir="ltr" href="https://t.me/s/V2rayBaaz" target="_blank" rel="noreferrer">@V2rayBaaz</a>
+        <span class="barwrap" dir="ltr"><span class="bar" style="width:13%"></span></span>
+        <span class="cnt mono">۱۶<span class="fresh">+۶ تازه</span></span>
+      </li>
+      <li class="row">
+        <span class="dot" style="color:#00e0a4;background:#00e0a4" title="OK"></span>
+        <a class="ch mono" dir="ltr" href="https://t.me/s/V2RAYROZ" target="_blank" rel="noreferrer">@V2RAYROZ</a>
+        <span class="barwrap" dir="ltr"><span class="bar" style="width:11%"></span></span>
+        <span class="cnt mono">۱۴<span class="fresh">+۷ تازه</span></span>
+      </li>
+      <li class="row">
+        <span class="dot" style="color:#00e0a4;background:#00e0a4" title="OK"></span>
+        <a class="ch mono" dir="ltr" href="https://t.me/s/V2rayNGX" target="_blank" rel="noreferrer">@V2rayNGX</a>
+        <span class="barwrap" dir="ltr"><span class="bar" style="width:11%"></span></span>
+        <span class="cnt mono">۱۳</span>
       </li>
       <li class="row">
         <span class="dot" style="color:#00e0a4;background:#00e0a4" title="OK"></span>
         <a class="ch mono" dir="ltr" href="https://t.me/s/v2ray26" target="_blank" rel="noreferrer">@v2ray26</a>
-        <span class="barwrap" dir="ltr"><span class="bar" style="width:1%"></span></span>
-        <span class="cnt mono">۱<span class="fresh">+۱ تازه</span></span>
+        <span class="barwrap" dir="ltr"><span class="bar" style="width:2%"></span></span>
+        <span class="cnt mono">۲<span class="fresh">+۲ تازه</span></span>
       </li></ul>
-    <div class="chanhead mono" dir="ltr" style="justify-content:flex-start;gap:8px">TOTAL = ۲۸۰<span style="color:var(--mint)">●</span> retention: 48h</div>
+    <div class="chanhead mono" dir="ltr" style="justify-content:flex-start;gap:8px">TOTAL = ۳۲۹<span style="color:var(--mint)">●</span> retention: 48h</div>
   </div>
 </section>
 
@@ -250,12 +279,14 @@ footer{border-top:1px solid var(--line);background:rgba(2,4,9,.4);margin-top:40p
         <div class="frame"><img id="qrImg" alt="QR of subscription" width="150" height="150"/></div>
         <p style="font-size:12px;color:var(--dim);line-height:1.9;max-width:260px">در v2rayNG گزینه‌ی <b style="color:#e6e8f2">اسکن QR</b> را در صفحه‌ی Subscription بزنید تا ساب مستقیم اضافه شود.</p>
       </div>
-      <div class="note" id="usersNote">شمارش کاربران روی لینک خام گیت‌هاب ممکن نیست — اگر داشبورد Next.js را (طبق README) دیپلوی کنید، این عدد با هر اجرای Action به‌روزرسانی می‌شود.</div>
+      <div class="note">نکته: کلاینت‌ها خودشان هر چند ساعت لیست را تازه می‌کنند؛ برای گرفتن آخرین کانفیگ‌ها لحظه‌ای، روی ساب دستی Update بزن. آمار این صفحه هر دقیقه از ریپو تازه می‌شود.</div>
     </div>
     <div class="glass card panel">
       <b style="font-size:15px;color:#f1f2fa">کلاینت‌های پیشنهادی</b>
       <ul class="clist" style="margin-top:18px">
         <li><span class="mono" dir="ltr">v2rayNG</span><span class="pl">Android</span></li>
+        <li><span class="mono" dir="ltr">PattNG</span><span class="pl">Windows</span></li>
+        <li><span class="mono" dir="ltr">PattNG Mobile</span><span class="pl">Android</span></li>
         <li><span class="mono" dir="ltr">Hiddify</span><span class="pl">همه‌ی پلتفرم‌ها</span></li>
         <li><span class="mono" dir="ltr">Streisand / FoXray</span><span class="pl">iOS</span></li>
         <li><span class="mono" dir="ltr">NekoBox</span><span class="pl">Android / PC</span></li>
@@ -276,6 +307,21 @@ footer{border-top:1px solid var(--line);background:rgba(2,4,9,.4);margin-top:40p
     <div class="glass card pstep"><span class="n">05</span><div class="ic2"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="6" y1="3" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg></div><div class="t">انتشار روی Pages</div><div class="d">ساب + این داشبورد خودکار کامیت و منتشر می‌شود</div></div>
   </div>
 </section>
+
+<section class="wrap" style="text-align:center">
+  <div class="glass card" style="border-radius:32px;padding:48px 26px;position:relative;overflow:hidden">
+    <div aria-hidden="true" style="position:absolute;top:-90px;left:50%;transform:translateX(-50%);width:520px;height:220px;border-radius:9999px;background:rgba(0,224,164,.09);filter:blur(80px);pointer-events:none"></div>
+    <span class="staranim" style="position:relative;display:inline-grid;place-items:center;width:80px;height:80px;border-radius:24px;border:1px solid rgba(255,176,32,.3);background:rgba(255,176,32,.09);color:#ffb020">
+      <svg width="38" height="38" viewBox="0 0 24 24" fill="currentColor" fill-opacity="0.28" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    </span>
+    <h2 style="position:relative;margin-top:24px">اگر پروژه بدردت خورد، ریپو رو <span class="grad">ستار</span> کن</h2>
+    <p class="lead" style="position:relative;margin:14px auto 0;max-width:560px">ستاره‌ی گیت‌هاب رایگان است ولی پروژه را زنده نگه می‌دارد — با آن، امکانات بعدی سریع‌تر می‌آیند: کانال‌های بیشتر، خروجی Clash و چند ساب هم‌زمان.</p>
+    <div style="position:relative;margin-top:26px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center">
+      <a class="btn bm" href="https://github.com/Axiomdeveloper/Axiom-TG-Sub" target="_blank" rel="noreferrer">به ریپو ستار بده</a>
+      <a class="btn bg1" href="https://github.com/Axiomdeveloper/Axiom-TG-Sub/issues/new" target="_blank" rel="noreferrer">گزارش باگ یا درخواست کانال جدید</a>
+    </div>
+  </div>
+</section>
 </main>
 
 <footer>
@@ -286,8 +332,8 @@ footer{border-top:1px solid var(--line);background:rgba(2,4,9,.4);margin-top:40p
 </footer>
 
 <script>
-var LAST_RUN = "2026-08-31T15:12:25+00:00";
-var NEXT_RUN = "2026-08-31T20:12:25+00:00";
+var LAST_RUN = "2026-08-31T19:47:35+00:00";
+var NEXT_RUN = "2026-09-01T00:47:35+00:00";
 var SUB_URL = "https://raw.githubusercontent.com/Axiomdeveloper/Axiom-TG-Sub/main/sub/axiom_sub.txt";
 var STATS_URL = "https://raw.githubusercontent.com/Axiomdeveloper/Axiom-TG-Sub/main/stats.json";
 var rtf = new Intl.RelativeTimeFormat("fa", { numeric: "auto" });
@@ -341,7 +387,8 @@ function refresh(_) {
     fetch(STATS_URL + "?t=" + Date.now()).then(function (r) { return r.ok ? r.json() : null; }).then(function (s) {
       if (!s) return;
       setText("stTotal", faN(s.total)); setText("stFresh", faN(s.fresh24h));
-      setText("stUsers", faN(s.users)); setText("heroTotal", faN(s.total));
+      var okc = 0; (s.perChannel || []).forEach(function (c) { if (c.ok) okc++; });
+      setText("stChan", faN(okc)); setText("heroTotal", faN(s.total));
       if (s.lastRun) { LAST_RUN = s.lastRun; var d = new Date(s.lastRun).getTime(); NEXT_RUN = new Date(d + 5 * 3600 * 1000).toISOString(); }
       tick();
     }).catch(function () {});
@@ -349,6 +396,30 @@ function refresh(_) {
 }
 function setText(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; }
 setInterval(tick, 1000); setInterval(refresh, 60000); tick();
+
+/* 3D tilt on cards — pointer devices only */
+(function () {
+  var fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!fine || reduced) return;
+  function bind(el, max) {
+    el.addEventListener("pointermove", function (e) {
+      var r = el.getBoundingClientRect();
+      var px = (e.clientX - r.left) / r.width - 0.5;
+      var py = (e.clientY - r.top) / r.height - 0.5;
+      el.style.transition = "transform .12s ease-out";
+      el.style.transform = "perspective(1000px) rotateX(" + (-py * max).toFixed(2) + "deg) rotateY(" + (px * max).toFixed(2) + "deg)";
+    });
+    el.addEventListener("pointerleave", function () {
+      el.style.transition = "transform .7s cubic-bezier(.16,1,.3,1)";
+      el.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg)";
+      clearTimeout(el._t);
+      el._t = setTimeout(function () { el.style.transform = ""; el.style.transition = ""; }, 700);
+    });
+  }
+  var els = document.querySelectorAll(".card, .chan, .pstep");
+  for (var i = 0; i < els.length; i++) bind(els[i], els[i].classList.contains("chan") ? 1.8 : 5);
+})();
 </script>
 </body>
 </html>

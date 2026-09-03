@@ -41,7 +41,7 @@ Every 5 hours, a GitHub Action scrapes the last 24 hours of 8 Telegram channels,
 ## لینک ساب / Subscription URL
 
 ```
-https://raw.githubusercontent.com/<USER>/<REPO>/main/sub/axiom_sub.txt
+https://raw.githubusercontent.com/Axiomdeveloper/Axiom-tg-sub/main/sub/axiom_sub.txt
 ```
 
 - اگر داشبورد Next.js را هم دیپلوی کنید، لینک `<APP_URL>/api/sub` همان‌طور که در داشبورد می‌بینید کار می‌کند و

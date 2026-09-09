@@ -1,9 +1,9 @@
 {
   "version": 1,
   "brand": "Axiom TG",
-  "lastRun": "2026-09-09T00:31:19+00:00",
-  "total": 269,
-  "fresh24h": 112,
+  "lastRun": "2026-09-09T05:19:43+00:00",
+  "total": 257,
+  "fresh24h": 111,
   "users": 0,
   "hits": 0,
   "updateEveryHours": 5,
@@ -18,7 +18,7 @@
     },
     {
       "id": "FreakConfig",
-      "count": 46,
+      "count": 45,
       "fresh": 35,
       "ok": true,
       "error": null
@@ -32,15 +32,15 @@
     },
     {
       "id": "prrofile_purple",
-      "count": 21,
+      "count": 20,
       "fresh": 8,
       "ok": true,
       "error": null
     },
     {
       "id": "V2rayBaaz",
-      "count": 63,
-      "fresh": 19,
+      "count": 60,
+      "fresh": 18,
       "ok": true,
       "error": null
     },
@@ -53,7 +53,7 @@
     },
     {
       "id": "V2rayng_Fast",
-      "count": 47,
+      "count": 40,
       "fresh": 26,
       "ok": true,
       "error": null

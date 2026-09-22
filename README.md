@@ -35,8 +35,7 @@ Every 5 hours, a GitHub Action scrapes the last 24 hours of 8 Telegram channels,
 
 <!-- AXIOM:PAGES:START -->
 **داشبورد زنده (GitHub Pages):** https://axiomdeveloper.github.io/Axiom-TG-Sub/  
-**لینک ساب:** `{sub_url}`
-<!-- AXIOM:PAGES:END -->
+
 
 ## لینک ساب / Subscription URL
 
@@ -44,10 +43,6 @@ Every 5 hours, a GitHub Action scrapes the last 24 hours of 8 Telegram channels,
 https://raw.githubusercontent.com/Axiomdeveloper/Axiom-tg-sub/main/sub/axiom_sub.txt
 ```
 
-- اگر داشبورد Next.js را هم دیپلوی کنید، لینک `<APP_URL>/api/sub` همان‌طور که در داشبورد می‌بینید کار می‌کند و
-  **شمارش کاربران یکتا** را فعال می‌کند (badge زیر):
-  `https://img.shields.io/endpoint?url=<APP_URL>/api/stats?badge=users`
-- ساب خام گیت‌هاب بدون داشبورد هم کاملاً کار می‌کند؛ فقط شمار کاربران ثبت نمی‌شود.
 
 ## کانال‌های منبع / Source channels
 

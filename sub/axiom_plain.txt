@@ -1,3 +1,4 @@
+ss://YWVzLTI1Ni1nY206Y2RCSURWNDJEQ3duZklO@51.79.85.185:8118#Axiom%20TG
 vless://2c634977-584e-4e1f-b501-1b70c77a6743@185.141.227.180:2053?encryption=none&security=tls&sni=dismissaltree.net&fp=random&type=xhttp&mode=auto&host=dismissaltree.net&path=%2Fapi%2Fv1%2Fupload#Axiom%20TG
 vless://c95f2cfc-ebae-4293-ad37-68c60553182c@psumszdg.danqela.ir:51595?encryption=none&security=none&type=tcp&headerType=http&host=play.google.com#Axiom%20TG
 vless://e73d4e2a-ac73-4948-960a-2c2dd57b7ea8@yellow-disk-0edf.diyenec996.workers.dev:443?encryption=none&security=tls&sni=yellow-disk-0edf.diyenec996.workers.dev&fp=chrome&type=ws&host=yellow-disk-0edf.diyenec996.workers.dev&path=%2F#Axiom%20TG

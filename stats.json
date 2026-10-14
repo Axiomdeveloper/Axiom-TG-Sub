@@ -1,9 +1,9 @@
 {
   "version": 1,
   "brand": "Axiom TG",
-  "lastRun": "2026-10-14T04:44:03+00:00",
-  "total": 234,
-  "fresh24h": 110,
+  "lastRun": "2026-10-14T10:04:13+00:00",
+  "total": 227,
+  "fresh24h": 103,
   "users": 0,
   "hits": 0,
   "updateEveryHours": 5,
@@ -11,36 +11,36 @@
   "perChannel": [
     {
       "id": "vpn_Click",
-      "count": 59,
-      "fresh": 25,
+      "count": 55,
+      "fresh": 24,
       "ok": true,
       "error": null
     },
     {
       "id": "FreakConfig",
-      "count": 37,
+      "count": 36,
       "fresh": 22,
       "ok": true,
       "error": null
     },
     {
       "id": "V2RAYROZ",
-      "count": 14,
-      "fresh": 7,
+      "count": 16,
+      "fresh": 8,
       "ok": true,
       "error": null
     },
     {
       "id": "prrofile_purple",
-      "count": 19,
+      "count": 17,
       "fresh": 8,
       "ok": true,
       "error": null
     },
     {
       "id": "V2rayBaaz",
-      "count": 40,
-      "fresh": 21,
+      "count": 38,
+      "fresh": 14,
       "ok": true,
       "error": null
     },

@@ -1,9 +1,9 @@
 {
   "version": 1,
   "brand": "Axiom TG",
-  "lastRun": "2026-10-16T14:45:44+00:00",
-  "total": 240,
-  "fresh24h": 75,
+  "lastRun": "2026-10-16T18:45:23+00:00",
+  "total": 254,
+  "fresh24h": 113,
   "users": 0,
   "hits": 0,
   "updateEveryHours": 5,
@@ -11,15 +11,15 @@
   "perChannel": [
     {
       "id": "vpn_Click",
-      "count": 100,
-      "fresh": 26,
+      "count": 115,
+      "fresh": 54,
       "ok": true,
       "error": null
     },
     {
       "id": "FreakConfig",
-      "count": 34,
-      "fresh": 31,
+      "count": 30,
+      "fresh": 21,
       "ok": true,
       "error": null
     },
@@ -39,10 +39,10 @@
     },
     {
       "id": "V2rayBaaz",
-      "count": 34,
-      "fresh": 0,
-      "ok": false,
-      "error": "ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
+      "count": 45,
+      "fresh": 23,
+      "ok": true,
+      "error": null
     },
     {
       "id": "V2rayNGX",
@@ -53,14 +53,14 @@
     },
     {
       "id": "V2rayng_Fast",
-      "count": 42,
+      "count": 33,
       "fresh": 17,
       "ok": true,
       "error": null
     },
     {
       "id": "v2ray26",
-      "count": 2,
+      "count": 3,
       "fresh": 1,
       "ok": true,
       "error": null

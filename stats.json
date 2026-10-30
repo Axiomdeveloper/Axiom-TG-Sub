@@ -1,9 +1,9 @@
 {
   "version": 1,
   "brand": "Axiom TG",
-  "lastRun": "2026-10-29T23:54:03+00:00",
-  "total": 172,
-  "fresh24h": 84,
+  "lastRun": "2026-10-30T05:35:30+00:00",
+  "total": 187,
+  "fresh24h": 99,
   "users": 0,
   "hits": 0,
   "updateEveryHours": 5,
@@ -39,8 +39,8 @@
     },
     {
       "id": "V2rayBaaz",
-      "count": 43,
-      "fresh": 28,
+      "count": 58,
+      "fresh": 43,
       "ok": true,
       "error": null
     },
